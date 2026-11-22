@@ -17,11 +17,12 @@ export class ApiService {
       return saved.trim().replace(/\/$/, '');
     }
 
-    // If running on Android device / emulator
+    // On physical Android phone connected via Wi-Fi:
     if (Capacitor.isNativePlatform()) {
-      return 'http://10.0.2.2:8000';
+      return 'http://192.168.1.4:8000';
     }
 
+    // In desktop browser:
     return 'http://localhost:8000';
   }
 
