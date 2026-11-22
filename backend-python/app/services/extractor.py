@@ -7,6 +7,7 @@ import tempfile
 import subprocess
 from typing import Dict, Any, List, Optional
 import yt_dlp
+from yt_dlp.extractor.instagram import InstagramIE
 import httpx
 
 # Ensure app package is importable
@@ -15,6 +16,27 @@ if app_dir not in sys.path:
     sys.path.insert(0, app_dir)
 
 from models.schemas import ExtractResponse, MediaItemSchema
+
+# Patch InstagramIE to support photos and carousels without 'No video formats found' error
+_orig_ig_extract_media = InstagramIE._extract_product_media
+
+def _patched_ig_extract_media(self, product_media):
+    ret = _orig_ig_extract_media(self, product_media)
+    # If no video formats were found, treat it as an image and use best candidate thumbnail
+    if not ret.get("formats") and ret.get("thumbnails"):
+        best = ret["thumbnails"][-1]
+        ret["formats"] = [{
+            "url": best["url"],
+            "ext": "jpg",
+            "vcodec": "none",
+            "acodec": "none",
+            "width": best.get("width"),
+            "height": best.get("height"),
+            "format_id": "image_highres",
+        }]
+    return ret
+
+InstagramIE._extract_product_media = _patched_ig_extract_media
 
 def get_ffmpeg_path() -> Optional[str]:
     """Finds ffmpeg path from environment, imageio_ffmpeg, or system PATH."""
@@ -74,6 +96,7 @@ class MediaExtractor:
             "skip_download": True,
             "extract_flat": False,
             "nocheckcertificate": True,
+            "format": "all",  # Allow all media formats including image formats
             "http_headers": {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
             }
@@ -118,6 +141,9 @@ class MediaExtractor:
                     if formats:
                         media_url = formats[-1].get("url")
 
+                if not media_url and thumb:
+                    media_url = thumb
+
                 if not thumb and media_url and not is_video:
                     thumb = media_url
 
@@ -146,6 +172,9 @@ class MediaExtractor:
                 formats = [f for f in info["formats"] if f.get("url")]
                 if formats:
                     media_url = formats[-1].get("url")
+
+            if not media_url and thumb:
+                media_url = thumb
 
             if not thumb and media_url and not is_video:
                 thumb = media_url
