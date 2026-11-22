@@ -1,0 +1,601 @@
+<div [class.dark]="isDarkMode()" class="min-h-screen bg-[#f8fafc] dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 flex flex-col justify-between pb-20 select-none">
+
+  <!-- ==================== TOP BAR & HEADER ==================== -->
+  <header class="bg-gradient-to-r from-[#00bcd4] via-[#00b4d8] to-[#0096c7] text-white pt-10 pb-8 px-5 rounded-b-[32px] shadow-lg relative">
+    
+    <!-- Top Row: App Title & Action Buttons -->
+    <div class="flex items-center justify-between mb-5">
+      <!-- Title -->
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-extrabold tracking-tight">
+          {{ activeTab() === 'home' ? 'SnapVid' : 'Downloads' }}
+        </h1>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2">
+        <!-- 👑 PRO Badge (Only on Home) -->
+        @if (activeTab() === 'home') {
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-300/80 bg-white/10 backdrop-blur-sm text-amber-300 text-xs font-bold tracking-wider shadow-sm">
+            <span>👑</span>
+            <span>PRO</span>
+          </div>
+        }
+
+        <!-- Dark/Light Mode Quick Toggle -->
+        <button 
+          (click)="toggleDarkMode()" 
+          class="p-2 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all text-white"
+          title="Toggle Dark/Light Mode">
+          @if (isDarkMode()) {
+            <!-- Sun Icon for switching to Light -->
+            <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+            </svg>
+          } @else {
+            <!-- Moon Icon for switching to Dark -->
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+            </svg>
+          }
+        </button>
+
+        <!-- Settings Gear Icon -->
+        <button 
+          (click)="showSettingsModal.set(true)" 
+          class="p-2 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all text-white"
+          title="Settings">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- HOME TAB: Input Link & Actions (Screenshot 1) -->
+    @if (activeTab() === 'home') {
+      <div class="space-y-3">
+        <!-- Input Field Card -->
+        <div class="relative bg-white dark:bg-slate-800 rounded-full shadow-inner flex items-center px-4 py-1.5 border border-white/20">
+          <input 
+            type="text" 
+            [(ngModel)]="inputUrl" 
+            placeholder="Insert media link..." 
+            class="w-full bg-transparent text-slate-800 dark:text-white placeholder-slate-400 text-sm focus:outline-none py-2 px-1 font-medium"
+            (keydown.enter)="handleDownloadClick()"
+          />
+          @if (inputUrl()) {
+            <button 
+              (click)="clearInput()" 
+              class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          }
+        </div>
+
+        <!-- Action Buttons: PASTE & DOWNLOAD -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <!-- PASTE Button -->
+          <button 
+            (click)="pasteFromClipboard()"
+            class="w-full py-3 px-4 rounded-full bg-[#d0f4f7] hover:bg-[#b8eff3] active:scale-[0.98] transition-all text-[#007b83] font-bold text-sm tracking-wide shadow-sm flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            PASTE
+          </button>
+
+          <!-- DOWNLOAD Button -->
+          <button 
+            (click)="handleDownloadClick()"
+            [disabled]="isLoading()"
+            class="w-full py-3 px-4 rounded-full bg-[#fbc02d] hover:bg-[#f9a825] active:scale-[0.98] transition-all text-slate-900 font-extrabold text-sm tracking-wide shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
+            @if (isLoading()) {
+              <svg class="animate-spin w-4 h-4 text-slate-900" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              LOADING...
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              DOWNLOAD
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- DOWNLOADS TAB: Filters Row (Screenshot 2) -->
+    @if (activeTab() === 'downloads') {
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2 pb-1">
+        <button 
+          (click)="downloadFilter.set('all')"
+          [class]="downloadFilter() === 'all' 
+            ? 'bg-white text-[#00bcd4] font-bold shadow-md' 
+            : 'bg-white/20 text-white font-medium'"
+          class="px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+          Downloading
+        </button>
+
+        <button 
+          (click)="downloadFilter.set('video')"
+          [class]="downloadFilter() === 'video' 
+            ? 'bg-white text-[#00bcd4] font-bold shadow-md' 
+            : 'bg-white/20 text-white font-medium'"
+          class="px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Video
+        </button>
+
+        <button 
+          (click)="downloadFilter.set('image')"
+          [class]="downloadFilter() === 'image' 
+            ? 'bg-white text-[#00bcd4] font-bold shadow-md' 
+            : 'bg-white/20 text-white font-medium'"
+          class="px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Image
+        </button>
+
+        <button 
+          (click)="downloadFilter.set('audio')"
+          [class]="downloadFilter() === 'audio' 
+            ? 'bg-white text-[#00bcd4] font-bold shadow-md' 
+            : 'bg-white/20 text-white font-medium'"
+          class="px-4 py-1.5 rounded-full text-xs whitespace-nowrap transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+          Audio
+        </button>
+      </div>
+    }
+  </header>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 px-4 py-5 space-y-4 max-w-lg mx-auto w-full">
+
+    <!-- Loading State Bar -->
+    @if (isLoading()) {
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-3 animate-pulse">
+        <div class="w-8 h-8 rounded-full border-3 border-[#00bcd4] border-t-transparent animate-spin"></div>
+        <div class="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {{ loadingStatus() }}
+        </div>
+      </div>
+    }
+
+    <!-- Error Banner -->
+    @if (errorMessage()) {
+      <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 p-4 rounded-2xl text-xs text-rose-700 dark:text-rose-300 flex items-start gap-2 shadow-sm">
+        <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="flex-1">{{ errorMessage() }}</div>
+        <button (click)="errorMessage.set(null)" class="text-rose-400 hover:text-rose-600">✕</button>
+      </div>
+    }
+
+    <!-- ==================== HOME TAB CONTENT ==================== -->
+    @if (activeTab() === 'home') {
+
+      <!-- 1. Extracted Results Card -->
+      @if (extractedData(); as data) {
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-md border border-slate-100 dark:border-slate-700 space-y-4">
+          
+          <!-- Post Info Header -->
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+              {{ data.platform }}
+            </span>
+            <span class="text-xs text-slate-500 font-medium">
+              {{ data.media_type === 'carousel' ? 'Multiple Images (' + data.items.length + ')' : data.media_type }}
+            </span>
+          </div>
+
+          <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-2">
+            {{ data.title }}
+          </h2>
+
+          <!-- A. Multi-Image Carousel Selector -->
+          @if (data.media_type === 'carousel') {
+            <div class="space-y-3">
+              <!-- Select All / Deselect Toolbar -->
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>Select images to download:</span>
+                <div class="flex gap-2">
+                  <button 
+                    (click)="selectAllImages()" 
+                    class="text-[#00bcd4] font-semibold hover:underline">
+                    Select All
+                  </button>
+                  <span>•</span>
+                  <button 
+                    (click)="deselectAllImages()" 
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    Deselect
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2-Column Images Grid -->
+              <div class="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto p-1">
+                @for (item of data.items; track item.id; let i = $index) {
+                  <div 
+                    (click)="toggleImageSelection(item.id)"
+                    [class.ring-2]="selectedImageIds().has(item.id)"
+                    [class.ring-[#00bcd4]]="selectedImageIds().has(item.id)"
+                    class="relative group rounded-xl overflow-hidden cursor-pointer bg-slate-100 dark:bg-slate-700 aspect-square shadow-sm transition-transform active:scale-95">
+                    
+                    <img 
+                      [src]="item.thumbnailUrl || item.mediaUrl" 
+                      [alt]="'Image ' + (i + 1)"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+
+                    <!-- Checkbox pill in corner -->
+                    <div class="absolute top-2 right-2">
+                      <div 
+                        [class]="selectedImageIds().has(item.id) 
+                          ? 'bg-[#00bcd4] text-white border-transparent' 
+                          : 'bg-black/40 text-transparent border-white/80'"
+                        class="w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-md transition-all">
+                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div class="absolute bottom-1 left-2 text-[10px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded">
+                      #{{ i + 1 }}
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Download Selected Button -->
+              <div class="pt-2 space-y-2">
+                <button 
+                  (click)="downloadSelectedImages()"
+                  [disabled]="!hasSelectedImages() || isLoading()"
+                  class="w-full py-3 rounded-full bg-[#00bcd4] hover:bg-[#00acc1] active:scale-[0.98] transition-all text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Selected Images ({{ selectedImageCount() }})
+                </button>
+
+                <p class="text-[11px] text-center text-slate-400">
+                  📁 Saved to: <span class="font-semibold text-teal-600 dark:text-teal-400">Pictures/SnapVid/Images</span>
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- B. Single Image View -->
+          @if (data.media_type === 'single_image') {
+            <div class="space-y-3">
+              <div class="rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 aspect-video flex items-center justify-center shadow-inner">
+                <img 
+                  [src]="data.items[0].thumbnailUrl || data.items[0].mediaUrl" 
+                  alt="Post preview" 
+                  class="w-full h-full object-contain"
+                />
+              </div>
+
+              <button 
+                (click)="downloadSingleImage(data.items[0])"
+                [disabled]="isLoading()"
+                class="w-full py-3 rounded-full bg-[#00bcd4] hover:bg-[#00acc1] active:scale-[0.98] transition-all text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Image
+              </button>
+
+              <p class="text-[11px] text-center text-slate-400">
+                📁 Saved to: <span class="font-semibold text-teal-600 dark:text-teal-400">Pictures/SnapVid/Images</span>
+              </p>
+            </div>
+          }
+
+          <!-- C. Video View (With Music or Without Music / Muted) -->
+          @if (data.media_type === 'video') {
+            <div class="space-y-3">
+              <div class="relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 aspect-video flex items-center justify-center shadow-inner group">
+                <img 
+                  [src]="data.thumbnail || data.items[0].thumbnailUrl" 
+                  alt="Video thumbnail" 
+                  class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <div class="w-12 h-12 rounded-full bg-white/90 text-[#00bcd4] flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 ml-0.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Video Download Buttons -->
+              <div class="space-y-2 pt-1">
+                <!-- 1. With Music -->
+                <button 
+                  (click)="downloadVideo(true)"
+                  [disabled]="isLoading()"
+                  class="w-full py-3 px-4 rounded-full bg-[#00bcd4] hover:bg-[#00acc1] active:scale-[0.98] transition-all text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                  </svg>
+                  Download Video (With Music)
+                </button>
+
+                <!-- 2. Without Music / Muted -->
+                <button 
+                  (click)="downloadVideo(false)"
+                  [disabled]="isLoading()"
+                  class="w-full py-3 px-4 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-[0.98] transition-all text-slate-800 dark:text-slate-200 font-bold text-sm shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 border border-slate-200 dark:border-slate-600">
+                  <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  </svg>
+                  Download Video (Without Music / Muted)
+                </button>
+
+                <!-- 3. Audio Only -->
+                <button 
+                  (click)="downloadAudioOnly()"
+                  [disabled]="isLoading()"
+                  class="w-full py-2.5 px-4 rounded-full bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-[0.98] transition-all text-teal-600 dark:text-teal-400 font-semibold text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+                  </svg>
+                  Download Audio Track (MP3)
+                </button>
+              </div>
+
+              <p class="text-[11px] text-center text-slate-400">
+                📁 Saved to: <span class="font-semibold text-teal-600 dark:text-teal-400">Movies/SnapVid/Videos</span>
+              </p>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- 2. Home Content Cards (Screenshot 1) -->
+      <section class="space-y-3 pt-2">
+        
+        <!-- Card 1: Favorite Pages -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform">
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white">Favorite Pages</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Tap to follow us and update NEWS.</p>
+          </div>
+          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        <!-- Card 2: Enjoying SnapVid? -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform">
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white">Enjoying SnapVid?</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Tap to rate us on Google Play</p>
+          </div>
+          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        <!-- Card 3: How to Download Accordion -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+          <div 
+            (click)="howToDownloadOpen.set(!howToDownloadOpen())"
+            class="p-4 flex items-center justify-between cursor-pointer">
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white">How to Download</h3>
+            <svg 
+              [class.rotate-180]="howToDownloadOpen()"
+              class="w-5 h-5 text-slate-400 transition-transform duration-200" 
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          @if (howToDownloadOpen()) {
+            <div class="px-4 pb-4 pt-1 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 space-y-2.5">
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+                <span>Open <b>Instagram</b>, <b>YouTube</b>, <b>TikTok</b>, or <b>X</b> and copy the post URL.</span>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+                <span>Tap <b>PASTE</b> in SnapVid to automatically load your copied link.</span>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 flex items-center justify-center font-bold text-[10px] shrink-0">3</span>
+                <span>Tap <b>DOWNLOAD</b>. For videos, choose with or without music. For carousel images, select specific or all images!</span>
+              </div>
+            </div>
+          }
+        </div>
+
+      </section>
+    }
+
+    <!-- ==================== DOWNLOADS TAB CONTENT (Screenshot 2) ==================== -->
+    @if (activeTab() === 'downloads') {
+      <div class="pt-4">
+        
+        <!-- Empty State: Matches Screenshot 2 -->
+        @if (filteredDownloads().length === 0) {
+          <div class="flex flex-col items-center justify-center py-24 text-center">
+            <!-- Outlined Document Download Icon -->
+            <div class="w-20 h-20 rounded-2xl border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 11v6m0 0l-2-2m2 2l2-2" />
+              </svg>
+            </div>
+            <h2 class="text-base font-medium text-slate-600 dark:text-slate-400">No Downloads.</h2>
+            <p class="text-xs text-slate-400 mt-1 max-w-xs">Downloaded videos and images will be displayed here and in your phone gallery.</p>
+          </div>
+        } @else {
+          <!-- Downloads List -->
+          <div class="space-y-3">
+            @for (item of filteredDownloads(); track item.id) {
+              <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                <!-- Thumbnail -->
+                <div class="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 relative">
+                  @if (item.thumbnailUrl) {
+                    <img [src]="item.thumbnailUrl" class="w-full h-full object-cover" alt="thumb" />
+                  } @else {
+                    <div class="w-full h-full flex items-center justify-center text-slate-400">
+                      @if (item.type === 'video') { 📹 } @else if (item.type === 'audio') { 🎵 } @else { 🖼️ }
+                    </div>
+                  }
+                  @if (item.isMuted) {
+                    <div class="absolute bottom-1 right-1 bg-black/70 text-[9px] text-white px-1 rounded">MUTED</div>
+                  }
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{{ item.fileName }}</h4>
+                  <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                    <span>{{ formatBytes(item.sizeBytes) }}</span>
+                    <span>•</span>
+                    <span class="text-teal-600 dark:text-teal-400 font-medium">{{ item.folder }}</span>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-1">
+                  <!-- Share -->
+                  <button 
+                    (click)="shareItem(item)"
+                    class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                  </button>
+
+                  <!-- Delete -->
+                  <button 
+                    (click)="storage.deleteItem(item.id)"
+                    class="p-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-950 text-slate-400 hover:text-rose-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    }
+
+  </main>
+
+  <!-- ==================== BOTTOM NAVIGATION (Sticky) ==================== -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 z-30 px-6 py-2 shadow-lg">
+    <div class="max-w-md mx-auto grid grid-cols-2">
+      <!-- Home Tab -->
+      <button 
+        (click)="activeTab.set('home')"
+        [class]="activeTab() === 'home' ? 'text-[#00bcd4] font-bold' : 'text-slate-400 font-medium'"
+        class="flex flex-col items-center justify-center py-1 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <span class="text-[11px] mt-0.5">Home</span>
+      </button>
+
+      <!-- Downloads Tab -->
+      <button 
+        (click)="activeTab.set('downloads')"
+        [class]="activeTab() === 'downloads' ? 'text-[#00bcd4] font-bold' : 'text-slate-400 font-medium'"
+        class="flex flex-col items-center justify-center py-1 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6m0 0l-2-2m2 2l2-2" />
+        </svg>
+        <span class="text-[11px] mt-0.5">Downloads</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== SETTINGS MODAL ==================== -->
+  @if (showSettingsModal()) {
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 dark:border-slate-700 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+          <h3 class="text-base font-bold text-slate-800 dark:text-white">SnapVid Settings</h3>
+          <button (click)="showSettingsModal.set(false)" class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+
+        <!-- Light / Dark Mode Setting -->
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Theme Mode</div>
+            <div class="text-xs text-slate-400">{{ isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</div>
+          </div>
+          <button 
+            (click)="toggleDarkMode()" 
+            class="px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+            Switch to {{ isDarkMode() ? 'Light' : 'Dark' }}
+          </button>
+        </div>
+
+        <!-- Backend URL Configuration -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Backend API URL</label>
+          <input 
+            type="text" 
+            [(ngModel)]="customBackendUrl"
+            placeholder="http://10.0.2.2:8000"
+            class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#00bcd4]"
+          />
+          <p class="text-[10px] text-slate-400">Use <code class="text-teal-600">http://10.0.2.2:8000</code> for Android Emulator or your PC's LAN IP for physical phones.</p>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button 
+            (click)="showSettingsModal.set(false)"
+            class="flex-1 py-2.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold">
+            Cancel
+          </button>
+          <button 
+            (click)="saveBackendSetting()"
+            class="flex-1 py-2.5 rounded-full bg-[#00bcd4] text-white text-xs font-bold shadow-md">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Toast Notification -->
+  @if (successToast()) {
+    <div class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-xl z-50 flex items-center gap-2 backdrop-blur-md animate-bounce">
+      <span>✨</span>
+      <span>{{ successToast() }}</span>
+    </div>
+  }
+
+</div>

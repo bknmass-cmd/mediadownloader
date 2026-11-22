@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production Build
+dist/
+dist-apk/
+*.apk
+*.aab
+
+# Misc
+.DS_Store
+.env
+.env.local
+npm-debug.log*
+yarn-debug.log*
+
+# Angular
+.angular/
+
+# Android
+android/.gradle
+android/build
+android/app/build
+android/.idea
+*.iml
+.gradle/
+build/
+local.properties
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+temp_downloads/
+downloads/

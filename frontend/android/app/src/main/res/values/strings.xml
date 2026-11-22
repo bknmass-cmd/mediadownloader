@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SnapVid</string>
+    <string name="title_activity_main">SnapVid</string>
+    <string name="package_name">com.snapvid.downloader</string>
+    <string name="custom_url_scheme">com.snapvid.downloader</string>
+</resources>
