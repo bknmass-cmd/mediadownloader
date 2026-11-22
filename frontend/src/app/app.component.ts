@@ -126,10 +126,21 @@ export class AppComponent implements OnInit {
     this.api.extract(url).subscribe({
       next: (res) => {
         this.isLoading.set(false);
+
+        // Normalize fields across snake_case and camelCase
+        if (res.items) {
+          res.items = res.items.map(item => ({
+            ...item,
+            thumbnailUrl: item.thumbnailUrl || (item as any).thumbnail_url || (item as any).media_url || item.mediaUrl || '',
+            mediaUrl: item.mediaUrl || (item as any).media_url || (item as any).thumbnail_url || item.thumbnailUrl || ''
+          }));
+        }
+
         this.extractedData.set(res);
 
         // Pre-select all images if carousel
-        if (res.media_type === 'carousel') {
+        const isCarousel = res.media_type === 'carousel' || (res as any).mediaType === 'carousel';
+        if (isCarousel && res.items) {
           const ids = new Set<string>();
           res.items.forEach(item => {
             if (item.type === 'image') ids.add(item.id);
@@ -287,6 +298,10 @@ export class AppComponent implements OnInit {
     } catch (e) {
       console.warn('Share error:', e);
     }
+  }
+
+  proxyImg(url: string | undefined): string {
+    return this.api.getProxiedImageUrl(url || '');
   }
 
   saveBackendSetting(): void {

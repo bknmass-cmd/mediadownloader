@@ -35,6 +35,16 @@ export class ApiService {
     return this.http.post<ExtractResponse>(`${baseUrl}/api/extract`, { url: targetUrl });
   }
 
+  getProxiedImageUrl(originalUrl: string): string {
+    if (!originalUrl) return '';
+    // If it's already a data: URI or blob:, don't proxy
+    if (originalUrl.startsWith('data:') || originalUrl.startsWith('blob:')) {
+      return originalUrl;
+    }
+    const baseUrl = this.getBaseUrl();
+    return `${baseUrl}/api/proxy-image?url=${encodeURIComponent(originalUrl)}`;
+  }
+
   getDownloadUrl(sourceUrl: string, type: 'video' | 'image', mute: boolean = false, audioOnly: boolean = false, filename?: string): string {
     const baseUrl = this.getBaseUrl();
     const params = new URLSearchParams({

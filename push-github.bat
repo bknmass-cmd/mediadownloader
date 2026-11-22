@@ -2,6 +2,7 @@
 title SnapVid - Git Push & Cloud APK Auto-Build
 echo ========================================================
 echo   Pushing code to GitHub:
+echo   https://github.com/bknmass-cmd/mediadownloader.git
 echo   (This automatically triggers GitHub Actions to build SnapVid.apk)
 echo ========================================================
 echo.

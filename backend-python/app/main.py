@@ -43,6 +43,15 @@ def remove_temp_file(path: str):
     except Exception as e:
         print(f"Error removing temp file {path}: {e}")
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "app": "SnapVid API",
+        "docs": "http://localhost:8000/docs",
+        "health": "http://localhost:8000/health"
+    }
+
 @app.get("/health")
 @app.get("/api/health")
 def health_check():
@@ -51,6 +60,52 @@ def health_check():
         "app": "SnapVid",
         "ffmpeg": bool(get_ffmpeg_path())
     }
+
+@app.get("/api/proxy-image")
+async def proxy_image(url: str = Query(..., description="Target image URL to proxy")):
+    """
+    Proxies remote social media images with proper Referer & User-Agent headers
+    to prevent CDN 403 Forbidden blocks in web browsers.
+    """
+    clean_url = url.replace("&amp;", "&").replace("\\u0026", "&")
+    try:
+        client = httpx.AsyncClient(
+            timeout=15.0,
+            follow_redirects=True,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                "Referer": "https://www.instagram.com/",
+                "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+            }
+        )
+        req = client.build_request("GET", clean_url)
+        resp = await client.send(req, stream=True)
+
+        if resp.status_code >= 400:
+            await resp.aclose()
+            await client.aclose()
+            raise HTTPException(status_code=resp.status_code, detail="Remote CDN refused image request")
+
+        content_type = resp.headers.get("content-type", "image/jpeg")
+
+        async def stream_image():
+            try:
+                async for chunk in resp.aiter_bytes():
+                    yield chunk
+            finally:
+                await resp.aclose()
+                await client.aclose()
+
+        return StreamingResponse(
+            stream_image(),
+            media_type=content_type,
+            headers={
+                "Cache-Control": "public, max-age=86400",
+                "Access-Control-Allow-Origin": "*"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Image proxy error: {str(e)}")
 
 @app.post("/api/extract", response_model=ExtractResponse)
 def extract_media(payload: ExtractRequest):

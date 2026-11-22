@@ -153,6 +153,8 @@ class MediaExtractor:
                         type="video" if is_video else "image",
                         thumbnail_url=thumb or media_url or "",
                         media_url=media_url or thumb or "",
+                        thumbnailUrl=thumb or media_url or "",
+                        mediaUrl=media_url or thumb or "",
                         duration=entry.get("duration"),
                         width=entry.get("width"),
                         height=entry.get("height")
@@ -185,6 +187,8 @@ class MediaExtractor:
                     type="video" if is_video else "image",
                     thumbnail_url=thumb or media_url or "",
                     media_url=media_url or thumb or "",
+                    thumbnailUrl=thumb or media_url or "",
+                    mediaUrl=media_url or thumb or "",
                     duration=info.get("duration"),
                     width=info.get("width"),
                     height=info.get("height")
@@ -195,6 +199,7 @@ class MediaExtractor:
         return ExtractResponse(
             platform=platform,
             media_type=media_type,
+            mediaType=media_type,
             title=title,
             items=items,
             thumbnail=items[0].thumbnail_url if items else None

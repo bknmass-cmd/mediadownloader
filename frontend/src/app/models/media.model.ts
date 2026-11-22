@@ -6,6 +6,8 @@ export interface MediaItem {
   type: 'image' | 'video';
   thumbnailUrl: string;
   mediaUrl: string;
+  thumbnail_url?: string;
+  media_url?: string;
   duration?: number;
   width?: number;
   height?: number;
@@ -14,7 +16,8 @@ export interface MediaItem {
 
 export interface ExtractResponse {
   platform: Platform;
-  mediaType: MediaType;
+  media_type: MediaType;
+  mediaType?: MediaType;
   title: string;
   items: MediaItem[];
   thumbnail?: string;
