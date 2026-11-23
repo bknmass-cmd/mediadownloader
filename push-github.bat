@@ -1,5 +1,5 @@
 @echo off
-title SnapVid - Git Push & Cloud APK Auto-Build
+title SnapVid - Git Push and Cloud APK Auto-Build
 echo ========================================================
 echo   Pushing code to GitHub:
 echo   https://github.com/bknmass-cmd/mediadownloader.git
@@ -15,7 +15,7 @@ git add -A
 
 echo.
 echo [2/3] Committing changes...
-git commit -m "feat: complete SnapVid project with Python, Node Express, Angular and MediaStore APK" 2>nul || echo No changes to commit.
+git commit -m "feat: connect app to live Render production backend https://mediadownloader-x43q.onrender.com" 2>nul || echo No new changes to commit.
 
 echo.
 echo [3/3] Pushing to main branch...

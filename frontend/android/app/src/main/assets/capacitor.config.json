@@ -1,0 +1,12 @@
+{
+	"appId": "com.snapvid.downloader",
+	"appName": "SnapVid",
+	"webDir": "dist/frontend/browser",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": true
+	},
+	"plugins": {
+		"Filesystem": {}
+	}
+}
