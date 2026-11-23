@@ -17,8 +17,13 @@ export class ApiService {
       return saved.trim().replace(/\/$/, '');
     }
 
-    // Live Render Cloud Backend:
-    return 'https://mediadownloader-x43q.onrender.com';
+    // On physical Android phone (native APK), connect to Render Cloud:
+    if (Capacitor.isNativePlatform()) {
+      return 'https://mediadownloader-x43q.onrender.com';
+    }
+
+    // In desktop browser running locally, use local Python backend:
+    return 'http://localhost:8000';
   }
 
   setBaseUrl(url: string): void {
